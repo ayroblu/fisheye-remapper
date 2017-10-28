@@ -29,10 +29,10 @@ function run(){
         //const coord = getCircCoord(ll.lat, ll.lng, dim/2)
         //const coord = getCircCoordPaul(-ll.lat, ll.lng, dim*2)
         
-        //const {lat,lng} = latLngDirCorrection(ll.lat, ll.lng, 60/180*Math.PI, 0)
-        //const {x,y} = getCircCoordHoriz(lat, lng, dim/2)
+        const {lat,lng} = latLngDirCorrection(ll.lat, ll.lng, 60/180*Math.PI, 0)
+        const coord = getCircCoordHoriz(lat, lng, dim/2)
         //const coord = rotateCirc(x, y, dim/2, 1/180*Math.PI)
-        const coord = rotateCirc(i, j, dim/2, 0)
+        //const coord = rotateCirc(i, j, dim/2, 0)
         for (var k = 0; k < 4; ++k) {
           im.set(i,j,k, pixels.get(parseInt(coord.x, 10)+xOffset,parseInt(coord.y, 10)+yOffset,k))
         }
