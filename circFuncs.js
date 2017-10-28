@@ -97,12 +97,9 @@ function latLngDirCorrection(lat, lng, rotTheta, rotPhi){
   }
 }
 function rotateCirc(x, y, radius, angle){
-  const {lat, lng} = pixel2LatLng(x, y, radius*2, radius*2)
-  const theta = Math.atan2(lng, lat)+angle
-  const r = Math.sqrt((x-radius)**2 + (y-radius)**2)
-	return {
-    x: radius + r * Math.sin(theta)// * (lat < 0 ? -1 : 1)
-	, y: radius - r * Math.cos(theta)// * (lat > 0 ? -1 : 1)
+  return {
+    x: Math.cos(angle) * (x-radius) - Math.sin(angle) * (y-radius) + radius
+  , y: Math.sin(angle) * (x-radius) + Math.cos(angle) * (y-radius) + radius
   }
 }
 

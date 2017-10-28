@@ -1,5 +1,5 @@
 const {
-  pixel2LatLng, getCircCoord, getCircCoordHoriz, latLngDirCorrection
+  pixel2LatLng, getCircCoord, getCircCoordHoriz, latLngDirCorrection, rotateCirc
 } = require('./circFuncs')
 
 describe('Gets Circular Coords roughly right', ()=>{
@@ -43,5 +43,15 @@ describe('Gets Circular Coords horiz', ()=>{
     console.log(latLngDirCorrection(Math.PI/10, Math.PI/10, 0, 0))
     console.log(latLngDirCorrection(Math.PI/10, Math.PI/10, Math.PI/4, 0))
     console.log(latLngDirCorrection(-Math.PI/2.1, Math.PI/10, Math.PI/4, 0))
+  })
+  it('rotate circ', ()=>{
+    console.log(rotateCirc(500, 500, 1000, 0))
+    console.log(rotateCirc(500, 1500, 1000, 0))
+    console.log(rotateCirc(1500, 500, 1000, 0))
+    console.log(rotateCirc(1500, 1500, 1000, 0))
+    console.log(rotateCirc(1000, 1500, 1000, 0))
+    console.log(rotateCirc(1500, 1000, 1000, 0))
+    console.log(rotateCirc(500, 1000, 1000, 0))
+    console.log(rotateCirc(1000, 500, 1000, 0))
   })
 })
