@@ -1,0 +1,8 @@
+node_modules
+*.jpg
+*.png
+*.arw
+
+/lib
+/coverage
+.nyc_output
