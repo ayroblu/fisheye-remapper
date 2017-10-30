@@ -22,10 +22,10 @@ function getCircCoord(lat, lng, radius) {
     return {x: radius, y: radius}
   }
 
-	// Pixel in fisheye space
-	return {
+  // Pixel in fisheye space
+  return {
     x: radius + r * Math.sin(theta) * (lat < 0 ? -1 : 1)
-	, y: radius + r * Math.cos(theta) * (lat > 0 ? -1 : 1)
+  , y: radius + r * Math.cos(theta) * (lat > 0 ? -1 : 1)
   }
   // You're dumb, this should actually be just remapping horizontals to be more stretched out
 }
@@ -39,22 +39,24 @@ function getSquareHypo(theta, FOV){
 function getCircCoordPaul(lat, lng, radius){
   const FOV = Math.PI
 
-	// Vector in 3D space
+  // Vector in 3D space
   const psph = {
-    x: Math.cos(lat) * Math.sin(lng)
-  , y: Math.cos(lat) * Math.cos(lng)
-  , z: Math.sin(lat)
+    x: Math.cos(lat) * Math.sin(lng) // left to right
+  , y: Math.cos(lat) * Math.cos(lng) // in to page
+  , z: Math.sin(lat) // vertical
   }
-	
-	// Calculate fisheye angle and radius
-	const theta = Math.atan(psph.z / psph.x);
-	const phi = Math.atan(Math.sqrt(psph.x*psph.x+psph.z*psph.z) / psph.y);
-	const r = radius * phi / FOV;
+  
+  // Calculate fisheye angle and radius
+  // angle around flat vertical plane (clock)
+  const theta = Math.atan2(psph.z, psph.x)
+  // angle from vertical plane
+  const phi = Math.atan2(Math.sqrt(psph.x*psph.x+psph.z*psph.z), psph.y);
+  const r = 2*radius * phi / FOV;
 
-	// Pixel in fisheye space
-	return {
-    x: 0.5 * radius + r * Math.cos(theta)
-	, y: 0.5 * radius + r * Math.sin(theta)
+  // Pixel in fisheye space
+  return {
+    x: radius + r * Math.cos(theta)
+  , y: radius + r * Math.sin(theta)
   }
 }
 function getCircCoordHoriz(lat, lng, radius){
@@ -84,6 +86,7 @@ function latLngDirCorrection(lat, lng, rotTheta, rotPhi){
   // adjust theta and phi for correction
   // Map back to lat lng based on new theta and phi
   // https://gis.stackexchange.com/questions/10808/manually-transforming-rotated-lat-lon-to-regular-lat-lon
+  // Assuming conventional lat lng, x is in to page, y is left to right, z is vertical
   const x = Math.cos(lat) * Math.cos(lng)
   const y = Math.cos(lat) * Math.sin(lng)
   const z = Math.sin(lat)
@@ -91,9 +94,9 @@ function latLngDirCorrection(lat, lng, rotTheta, rotPhi){
   const yRot = -Math.cos(rotTheta)*Math.sin(rotPhi)*x + Math.cos(rotPhi)*y - Math.sin(rotTheta)*Math.sin(rotPhi)*z
   const zRot = -Math.sin(rotTheta)*x + Math.cos(rotTheta)*z
 
-	return {
+  return {
     lat: Math.asin(zRot)
-	, lng: Math.atan2(yRot, xRot)
+  , lng: Math.atan2(yRot, xRot)
   }
 }
 function rotateCirc(x, y, radius, angle){

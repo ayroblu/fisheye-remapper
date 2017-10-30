@@ -27,7 +27,7 @@ function run(){
       for (var j = 0; j < dim; ++j) {
         const ll = pixel2LatLng(i, j, dim*2, dim)
         //const coord = getCircCoord(ll.lat, ll.lng, dim/2)
-        //const coord = getCircCoordPaul(-ll.lat, ll.lng, dim*2)
+        //const coord = getCircCoordPaul(-ll.lat, ll.lng, dim)
         
         const {lat,lng} = latLngDirCorrection(ll.lat, ll.lng, 35/180*Math.PI, 0)
         const {x,y} = getCircCoordHoriz(lat, lng, dim/2)
