@@ -4,60 +4,66 @@ const getPixels = require("get-pixels")
 const savePixels = require('save-pixels')
 const zeros = require("zeros")
 const {
-  pixel2LatLng, getCircCoord, getCircCoordPaul, getCircCoordHoriz
+  pixel2LatLng, getCircCoordHoriz
 , latLngDirCorrection, rotateCirc
 } = require('./circFuncs')
  
-function run(){
-  getPixels("image.jpg", function(err, pixels) {
-    if(err) {
-      console.log("Bad image path")
-      return
-    }
-    console.log("got pixels", Object.keys(pixels), pixels.get(100,100,0), pixels.get(100,100,1), pixels.get(100,100,2), pixels.get(100,100,3), pixels.shape.slice())
+async function run(inputFilename, outputFilename, options={}){
+  const log = options.silent ? ()=>{} : console.log
+  if (!inputFilename) {
+    return log('Missing input filename')
+  }
+  if (!outputFilename) {
+    return log('Missing output filename')
+  }
+  log('Reading ', inputFilename)
+  const pixels = await new Promise((y,n)=>{
+    getPixels(inputFilename, function(err, pixels) {
+      if(err) {
+        log("Bad image path")
+        n(err)
+        return
+      }
+      y(pixels)
+    })
+  })
+  log('Pixels read, making changes')
+  
+  const width = pixels.shape[0]
+  const height = pixels.shape[1]
+  const dim = Math.min(width, height)
+  const im = zeros([dim*2, dim, 4])
 
-    var width = pixels.shape[0]
-    var height = pixels.shape[1]
-    var dim = Math.min(width, height)
-    var im = zeros([dim*2, dim, 4])
-
-    var xOffset = (width - dim) / 2
-    var yOffset = (height - dim) / 2
-    for (var i = 0; i < dim*2; ++i) {
-      for (var j = 0; j < dim; ++j) {
-        const ll = pixel2LatLng(i, j, dim*2, dim)
-        //const coord = getCircCoord(ll.lat, ll.lng, dim/2)
-        //const coord = getCircCoordPaul(-ll.lat, ll.lng, dim)
-        
-        const {lat,lng} = latLngDirCorrection(ll.lat, ll.lng, 35/180*Math.PI, 0)
-        const {x,y} = getCircCoordHoriz(lat, lng, dim/2)
-        const coord = rotateCirc(x, y, dim/2, -6/180*Math.PI)
-        //const coord = rotateCirc(i, j, dim/2, 0)
-        for (var k = 0; k < 4; ++k) {
-          im.set(i,j,k, pixels.get(parseInt(coord.x, 10)+xOffset,parseInt(coord.y, 10)+yOffset,k))
-        }
+  const xOffset = (width - dim) / 2
+  const yOffset = (height - dim) / 2
+  for (var i = 0; i < dim*2; ++i) {
+    for (var j = 0; j < dim; ++j) {
+      const ll = pixel2LatLng(i, j, dim*2, dim)
+      
+      const {lat,lng} = options.rot
+        ? latLngDirCorrection(ll.lat, ll.lng, options.persp.theta, options.persp.phi)
+        : ll
+      const {x,y} = getCircCoordHoriz(lat, lng, dim/2)
+      const coord = options.rot
+        ? rotateCirc(x, y, dim/2, options.rot)
+        : {x,y}
+      for (var k = 0; k < 4; ++k) {
+        im.set(i,j,k, pixels.get(parseInt(coord.x, 10)+xOffset,parseInt(coord.y, 10)+yOffset,k))
       }
     }
-    // simple: lets say i'm pointing 45 degrees up, no longitudinal adjustment given FOV = 180deg horiz + vert
-    // idea1: loop over all pixels, convert to lat lng, check if inside FOV, if is check where it is in circ and write
+  }
+  
+  log('writing...', outputFilename)
+  const isPng = outputFilename.endsWith('.png')
+  const writeStream = fs.createWriteStream(outputFilename, { flags : 'w' });
+  savePixels(im, isPng ? 'png' : 'jpg').pipe(writeStream)
 
-    // pixel2LatLng: x/(dim*2) - pi, y / dim - pi/2
-    // FOVCheck: -lngFOV < x-lngRot < lngFOV, -latFOV < y-latRot < latFOV
-      // lngRot = 0, lngFOV = pi, latRot = pi/4, latFOV = pi. Also have to do a correction
-      // if y-latRot < -pi/2 then lat=-pi-(y-latRot) and lng=(lng > 0 ? lng-pi : lng + pi)
-        // =>-80 - 45 = -125 -> -55
-      // if y-latRot > pi/2 then pi-(y-latRot) and lng=(lng > 0 ? lng-pi : lng + pi)
-        // =>80 + 45 = 125 -> 55
-    // getCircColour: adjLatLng, x:Math.cos(lat)*Math.sin(lng), y: Math.sin(lat)*Math.cos(lng), z: Math.sin(phi)
-    
-    console.log('writing...')
-    const writeStream = fs.createWriteStream('someFile.jpg', { flags : 'w' });
-    savePixels(im, "jpg").pipe(writeStream)
-
-    writeStream.on('close', function () {
-      console.log('All done!');
-    });
+  writeStream.on('close', function () {
+    log('All done!');
   })
 }
 
-run()
+run('image.jpg', 'someFile.jpg', {
+  persp: {theta: 35/180*Math.PI, phi: 0}
+, rot: -6/180*Math.PI
+})

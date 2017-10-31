@@ -4,61 +4,6 @@ function pixel2LatLng(x, y, dimX, dimY){
   , lng: (x / dimX - 0.5)*2*Math.PI // x 0-dimX to 360 (-pi to pi)
   }
 }
-function getCircCoord(lat, lng, radius) {
-  const FOV = Math.PI
-  // 1. convert lat, lng to angle and radius
-  // 2. convert angle and radius to x and y
-  if (Math.abs(lat) > FOV/2 || Math.abs(lng) > FOV/2) {
-    //console.log('too far', lat, lng)
-    return {x: 0, y: 0}
-  }
-
-  const theta = Math.atan(lng / lat)
-  const squareR = getSquareHypo(theta, FOV)
-  const r = radius * Math.sqrt(lat**2 + lng**2)/squareR
-  //console.log(lng, lat, theta, squareR, r, radius)
-  if (isNaN(theta)){
-    console.log('nan theta')
-    return {x: radius, y: radius}
-  }
-
-  // Pixel in fisheye space
-  return {
-    x: radius + r * Math.sin(theta) * (lat < 0 ? -1 : 1)
-  , y: radius + r * Math.cos(theta) * (lat > 0 ? -1 : 1)
-  }
-  // You're dumb, this should actually be just remapping horizontals to be more stretched out
-}
-function getSquareHypo(theta, FOV){
-  if (Math.abs(theta) <= Math.PI/4) {
-    return (FOV/2)/Math.cos(theta)
-  } else {
-    return Math.abs((FOV/2)/Math.sin(theta))
-  }
-}
-function getCircCoordPaul(lat, lng, radius){
-  const FOV = Math.PI
-
-  // Vector in 3D space
-  const psph = {
-    x: Math.cos(lat) * Math.sin(lng) // left to right
-  , y: Math.cos(lat) * Math.cos(lng) // in to page
-  , z: Math.sin(lat) // vertical
-  }
-  
-  // Calculate fisheye angle and radius
-  // angle around flat vertical plane (clock)
-  const theta = Math.atan2(psph.z, psph.x)
-  // angle from vertical plane
-  const phi = Math.atan2(Math.sqrt(psph.x*psph.x+psph.z*psph.z), psph.y);
-  const r = 2*radius * phi / FOV;
-
-  // Pixel in fisheye space
-  return {
-    x: radius + r * Math.cos(theta)
-  , y: radius + r * Math.sin(theta)
-  }
-}
 function getCircCoordHoriz(lat, lng, radius){
   // so to do this, I get the lat lng, figure out the vertical and horizontal
   const FOV = Math.PI
@@ -79,9 +24,7 @@ function getCircCoordHoriz(lat, lng, radius){
   , y: radius + y
   }
 }
-function latLngDirCorrection(lat, lng, rotTheta, rotPhi){
-  // You have to do a polar rotation you silly
-
+function latLngDirCorrection(lat, lng, rotTheta=0, rotPhi=0){
   // convert to theta or phi
   // adjust theta and phi for correction
   // Map back to lat lng based on new theta and phi
@@ -108,8 +51,6 @@ function rotateCirc(x, y, radius, angle){
 
 module.exports = {
   pixel2LatLng
-, getCircCoord
-, getCircCoordPaul
 , getCircCoordHoriz
 , latLngDirCorrection
 , rotateCirc
