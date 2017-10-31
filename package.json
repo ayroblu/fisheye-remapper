@@ -1,12 +1,15 @@
 {
+	"name": "fisheye-remapper",
+	"version": "0.1.0",
   "dependencies": {
     "get-pixels": "^3.3.0",
+		"minimist": "^1.2.0",
     "mocha": "^4.0.1",
     "save-pixels": "^2.3.4",
     "zeros": "^1.0.0"
   },
   "scripts": {
-    "start": "node index.js",
-    "test": "mocha *.test.js"
+    "start": "",
+    "test": "mocha src/*.test.js"
   }
 }

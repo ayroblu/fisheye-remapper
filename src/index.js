@@ -40,7 +40,7 @@ async function run(inputFilename, outputFilename, options={}){
     for (var j = 0; j < dim; ++j) {
       const ll = pixel2LatLng(i, j, dim*2, dim)
       
-      const {lat,lng} = options.rot
+      const {lat,lng} = options.persp
         ? latLngDirCorrection(ll.lat, ll.lng, options.persp.theta, options.persp.phi)
         : ll
       const {x,y} = getCircCoordHoriz(lat, lng, dim/2)
@@ -63,7 +63,8 @@ async function run(inputFilename, outputFilename, options={}){
   })
 }
 
-run('image.jpg', 'someFile.jpg', {
-  persp: {theta: 35/180*Math.PI, phi: 0}
-, rot: -6/180*Math.PI
-})
+module.exports = run
+//run('image.jpg', 'someFile.jpg', {
+//  persp: {theta: 35/180*Math.PI, phi: 0}
+//, rot: -6/180*Math.PI
+//})
