@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
-const options = require('minimist')(process.argv.slice(2))
+const options = require('minimist')(process.argv.slice(2), {
+  alias: {p: 'persp-phi', t: 'persp-theta', r: 'rotate', v: 'version', h: 'help'}
+})
 const run = require('./src')
 const {help, notEnough, tooMany} = require('./text')
 
@@ -26,10 +28,10 @@ const [inputFilename, outputFilename] = commands
 
 const params = {
   persp: (options.t || options.p) ? {
-    theta: options.t
-  , phi: options.p
+    theta: parseFloat(options.t || 0)*Math.PI/180
+  , phi: parseFloat(options.p || 0)*Math.PI/180
   } : null
-, rot: options.r
+, rot: parseFloat(options.r)*Math.PI/180
 }
 run(inputFilename, outputFilename, params)
 
