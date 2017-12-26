@@ -1,6 +1,9 @@
 {
 	"name": "fisheye-remapper",
 	"version": "0.1.0",
+  "bin": {
+    "fisheye-remapper": "./bin.js"
+  },
   "dependencies": {
     "get-pixels": "^3.3.0",
 		"minimist": "^1.2.0",
